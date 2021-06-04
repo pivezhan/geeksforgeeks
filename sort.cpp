@@ -1,26 +1,28 @@
 /* Here All algorithms for sorting are implemented*/
 
-
-#include <stdio.h>
-#include <stdlib.h>
-
-// C++ program for implementation of Heap Sort
 #include <iostream>
+#include <stdio.h>
+#include <string.h>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+
 using namespace std;
+#define RANGE 20
 
-#define swap(a, b) ({    \
-  typeof (a) _tmp = (a); \
-  (a) = (b);             \
-  (b) = _tmp;            \
-})
+// #define swap(a, b) ({    \
+//   typeof (a) _tmp = (a); \
+//   (a) = (b);             \
+//   (b) = _tmp;            \
+// })
 
-// void swap(int *a, int *b)
-// {
-//     int temp;
-//     temp = *a;
-//     *a = *b;
-//     *b = temp;
-// }
+
+void swap(int *a, int *b)
+{
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
 
 /*
 ////////////////////////////////////
@@ -49,7 +51,7 @@ void selectionSort(int arr[], int n)
     {
         // Find the minimum element in unsorted array
         min_idx = i;
-        for (j = i+1; j < n; j++)
+        for (j = i + 1; j < n; j++)
           if (arr[j] < arr[min_idx])
             min_idx = j;
   
@@ -289,6 +291,152 @@ void heapSort(int arr[], int n)
     }
 }
 
+/*
+///////////////////////////////////
+/////////// Counting Sort ////////////
+///////////////////////////////////
+Counting sort is a sorting technique based on keys between a
+ specific range. It works by counting the number of objects 
+ having distinct key values (kind of hashing). 
+ Then doing some arithmetic to calculate the position of each
+  object in the output sequence.
+Time Complexity: O(n+k) where n is the number of elements in input array 
+and k is the range of input. 
+Auxiliary Space: O(n+k)
+ 
+For simplicity, consider the data in the range 0 to 9. 
+Input data: 1, 4, 1, 2, 7, 5, 2
+  1) Take a count array to store the count of each unique object.
+  Index:     0  1  2  3  4  5  6  7  8  9
+  Count:     0  2  2  0   1  1  0  1  0  0
+
+  2) Modify the count array such that each element at each index 
+  stores the sum of previous counts. 
+  Index:     0  1  2  3  4  5  6  7  8  9
+  Count:     0  2  4  4  5  6  6  7  7  7
+
+The modified count array indicates the position of each object in 
+the output sequence.
+ 
+  3) Output each object from the input sequence followed by 
+  decreasing its count by 1.
+  Process the input data: 1, 4, 1, 2, 7, 5, 2. Position of 1 is 2.
+  Put data 1 at index 2 in output. Decrease count by 1 to place 
+  next data 1 at an index 1 smaller than this index.
+*/
+void countingSort(int arr[], int n)
+{
+    // The output character array that will have sorted arr
+    int *output;
+    output = (int*)calloc(n, sizeof(int));
+    // Create a count array to store count of inidividul
+    // characters and initialize count array as 0
+    int count[RANGE + 1], i;
+    memset(count, 0, sizeof(count));
+
+        // Store count of each character
+    for (i = 0; i < n; ++i)
+        ++count[arr[i]];
+
+     // Change count[i] so that count[i] now contains actual
+    // position of this character in output array
+    for (i = 1; i <= RANGE; ++i)
+        count[i] += count[i - 1];
+    // Build the output character array
+    for (i = 0; i < n; ++i) {
+        output[count[arr[i]] - 1] = arr[i];
+        --count[arr[i]];
+    }
+ 
+    /*
+     For Stable algorithm
+     for (i = n-1; i>=0; --i)
+    {
+        output[count[arr[i]]-1] = arr[i];
+        --count[arr[i]];
+    }
+    For Logic : See implementation
+    */
+    // Copy the output array to arr, so that arr now
+    // contains sorted characters
+    for (i = 0; i < n; ++i)
+        arr[i] = output[i];
+}
+
+
+/*
+///////////////////////////////////
+/////////// Radix Sort ////////////
+///////////////////////////////////
+https://www.geeksforgeeks.org/radix-sort/
+
+Counting sort is a sorting technique based on keys between a
+ specific range. It works by counting the number of objects 
+ having distinct key values (kind of hashing). 
+What if the elements are in the range from 1 to n2? 
+We can’t use counting sort because counting sort will take O(n2) which is worse than comparison-based sorting algorithms. Can we sort such an array in linear time? 
+
+Radix Sort is the answer. The idea of Radix Sort is to do 
+digit by digit sort starting from least significant digit 
+to most significant digit. Radix sort uses counting sort as 
+a subroutine to sort.
+
+Do following for each digit i where i varies from least significant 
+digit to the most significant digit.
+Sort input array using counting sort (or any stable sort) according
+to the i’th digit.
+
+Original, unsorted list:
+170, 45, 75, 90, 802, 24, 2, 66
+
+Sorting by least significant digit (1s place) gives: 
+[*Notice that we keep 802 before 2, because 802 occurred 
+before 2 in the original list, and similarly for pairs 
+170 & 90 and 45 & 75.]
+
+170, 90, 802, 2, 24, 45, 75, 66
+
+Sorting by next digit (10s place) gives: 
+[*Notice that 802 again comes before 2 as 802 comes before 
+2 in the previous list.]
+
+802, 2, 24, 45, 66, 170, 75, 90
+
+Sorting by the most significant digit (100s place) gives:
+2, 24, 45, 66, 75, 90, 170, 802
+
+What is the running time of Radix Sort? 
+Let there be d digits in input integers. 
+Radix Sort takes O(d*(n+b)) time where b is the base for 
+representing numbers, for example, for the decimal system, 
+b is 10. What is the value of d? If k is the maximum possible value, 
+then d would be O(logb(k)). So overall time complexity is 
+O((n+b) * logb(k)). Which looks more than the time complexity 
+of comparison-based sorting algorithms for a large k. 
+Let us first limit k. Let k <= nc where c is a constant. 
+In that case, the complexity becomes O(nLogb(n)). 
+But it still doesn’t beat comparison-based sorting algorithms. 
+What if we make the value of b larger?. 
+What should be the value of b to make the time complexity linear? 
+If we set b as n, we get the time complexity as O(n). 
+In other words, we can sort an array of integers with a range from 
+1 to nc if the numbers are represented in base n 
+(or every digit takes log2(n) bits).
+
+
+Is Radix Sort preferable to Comparison based sorting algorithms like 
+Quick-Sort? 
+If we have log2n bits for every digit, the running time of Radix appears
+ to be better than Quick Sort for a wide range of input numbers. 
+ The constant factors hidden in asymptotic notation are higher 
+ for Radix Sort and Quick-Sort uses hardware caches more effectively. 
+ Also, Radix sort uses counting sort as a subroutine and counting 
+ sort takes extra space to sort numbers.
+*/
+void radixSort(int arr[], int n)
+{
+    
+}
 
 int main()
 {
@@ -322,11 +470,12 @@ int main()
     // insertionSort1(input, num);
     // selectionSort(input, num);
     // bubbleSort(int arr[], int n);
-    mergeSort(input, 0, num - 1);
+    // mergeSort(input, 0, num - 1);
+    countingSort(input, num);
 
     for (int i = 0; i < num; ++i)
     {
-        printf("soted= %d\n", input[i]);
+        printf("sorted= %d\n", input[i]);
     }
     return 0;
 }
