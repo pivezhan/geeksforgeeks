@@ -23,6 +23,133 @@ void swap(int *a, int *b)
     *a = *b;
     *b = temp;
 }
+/*
+////////////////////////////////////
+//////// priority queue ////////////
+////////////////////////////////////
+A typical priority queue supports following operations.
+insert(item, priority): Inserts an item with given priority.
+getHighestPriority(): Returns the highest priority item.
+deleteHighestPriority(): Removes the highest priority item.
+
+Using Array: A simple implementation is to use array of following 
+structure.
+
+struct item {
+   int item;
+   int priority;
+}
+insert() operation can be implemented by adding an item 
+at end of array in O(1) time.
+getHighestPriority() operation can be implemented by linearly
+searching the highest priority item in array. 
+This operation takes O(n) time.
+deleteHighestPriority() operation can be implemented by first 
+linearly searching an item, then removing the item by moving all 
+subsequent items one position back.
+
+Using linked list:
+We can also use Linked List, time complexity of all operations with 
+linked list remains same as array. 
+The advantage with linked list is deleteHighestPriority() can 
+be more efficient as we don’t have to move items.
+
+Using Heaps:
+Heap is generally preferred for priority queue implementation 
+because heaps provide better performance compared arrays or linked list. 
+In a Binary Heap, getHighestPriority() can be implemented in O(1) time, 
+insert() can be implemented in O(Logn) time and deleteHighestPriority() 
+can also be implemented in O(Logn) time.
+With Fibonacci heap, insert() and getHighestPriority() can be 
+implemented in O(1) amortized time and deleteHighestPriority() can 
+be implemented in O(Logn) amortized time.
+
+               peek()    push()    pop()
+-----------------------------------------
+Linked List |   O(1)      O(n)      O(1)
+            |
+Binary Heap |   O(1)    O(Log n)   O(Log n)
+*/
+typedef struct node {
+    int data;
+    int priority;
+    struct node* next;
+} Node;
+
+// Function to create a new node
+Node* newNode(int data, int priority)
+{
+    Node* temp = (Node*)malloc(sizeof(Node));
+    temp->data = data;
+    temp->priority = priority;
+    temp->next = NULL;
+    return temp;
+}
+
+// Function to find the maximum node in a heap
+Node* findMax(Node* root)
+{
+    Node* current = root;
+    Node* parent = NULL;
+    while (current->next != NULL) {
+        parent = current;
+        current = current->next;
+    }
+    return current;
+}
+
+// return value at the head
+int peek(Node** head)
+{
+    return (*head)->data;
+}
+
+// Remove element with high 
+// priority from a heap
+void getHighestPriority(Node** head)
+{
+    Node* temp = *head;
+    *head = (*head)->next;
+    free(temp);
+}
+
+void insert(Node** head, int data, int priority)
+{
+    Node* start = (*head);
+
+    // Create a new node
+    Node* temp = newNode(data, priority);
+    
+    // Special case: The head of the list has lesser
+    // priority than the new node. so add the new node
+    // before the head node and change the head node
+    if (start == NULL || priority > start->priority) {
+    temp->next = *head;
+    (*head) = temp;
+    }
+    else {
+        // Traverse the list to find 
+        // the position to insert the new node
+        while (start->next != NULL && 
+        start->next->priority < priority) {
+            start = start->next;
+        }
+        // Either at the end of the list or
+        // at required position
+        temp->next = start->next;
+        start->next = temp;
+        }
+}
+
+//Function to check if list is empty
+int isEmpty(Node** head)
+{
+    return (*head) == NULL;
+}
+
+
+
+
 
 /*
 ////////////////////////////////////
@@ -241,7 +368,8 @@ sub-array of arr to be sorted */
     Heap Sort Algorithm for sorting in increasing order: 
 1. Build a max heap from the input data. 
 2. At this point, the largest item is stored at the root of the heap. 
-Replace it with the last item of the heap followed by reducing the size of heap by 1. 
+Replace it with the last item of the heap followed by reducing the size 
+of heap by 1. 
 Finally, heapify the root of the tree. 
 3. Repeat step 2 while the size of the heap is greater than 1.
 Time Complexity: Time complexity of heapify is O(Logn). 
@@ -477,5 +605,17 @@ int main()
     {
         printf("sorted= %d\n", input[i]);
     }
+
+    // priority queue
+    Node* pq = newNode(4, 1);
+    insert(&pq, 3, 2);
+    insert(&pq, 5, 3);
+    insert(&pq, 1, 4);
+
+    while(!isEmpty(&pq)) {
+        printf(" priority: %d ", peek(&pq));
+        getHighestPriority(&pq);
+    }
+
     return 0;
 }

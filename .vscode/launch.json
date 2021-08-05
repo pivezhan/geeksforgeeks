@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/sort",
+            "program": "${workspaceFolder}/sort.cpp",
             "args": [],
             "stopAtEntry": false,
             "cwd": "C:/Users/Test/Downloads/geeksforgeeks",
